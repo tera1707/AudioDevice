@@ -14,9 +14,7 @@ public:
     ~CVolumeNotification();
 
     ULONG STDMETHODCALLTYPE AddRef();
-
     ULONG STDMETHODCALLTYPE Release();
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, VOID** ppvInterface);
-
     HRESULT STDMETHODCALLTYPE OnNotify(PAUDIO_VOLUME_NOTIFICATION_DATA pNotify);
 };
