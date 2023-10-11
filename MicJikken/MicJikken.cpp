@@ -5,6 +5,7 @@
 #include <string>
 
 #include "CMMNotificationClient.h"
+#include "CVolumeNotification.h"
 
 int main()
 {
@@ -13,12 +14,18 @@ int main()
     IMMDeviceCollection* pCollection = NULL;
     UINT deviceCount = 0;
 
+
+    IMMDevice* pEndpoint[8] = { NULL };
+    IPropertyStore* pProperties[8] = { NULL };
+
+    IAudioEndpointVolume* pAudioEndVol[8] = { NULL };
+    CVolumeNotification* vn[8] = { NULL };
+
     // COMの初期化(COMのお作法)
     hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 
     // COMからMMDeviceEnumeratorを取ってくる
     hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, IID_PPV_ARGS(&pEnum));
-
 
     auto nc = new CMMNotificationClient(pEnum);
     pEnum->RegisterEndpointNotificationCallback(nc);
@@ -32,38 +39,38 @@ int main()
     for (int i = 0; i < deviceCount; i++)
     {
         // デバイスの情報を取る
-        IMMDevice* pEndpoint = NULL;
-        pCollection->Item(i, &pEndpoint);
+        pCollection->Item(i, &pEndpoint[i]);
 
         // デバイスのプロパティを取る
-        IPropertyStore* pProperties;
-        pEndpoint->OpenPropertyStore(STGM_READ, &pProperties);
+        pEndpoint[i]->OpenPropertyStore(STGM_READ, &pProperties[i]);
 
         // 取ったプロパティから、値を指定して取得する
         PROPVARIANT vName;
         PropVariantInit(&vName);
-        pProperties->GetValue(PKEY_Device_FriendlyName, &vName);
+        pProperties[i]->GetValue(PKEY_Device_FriendlyName, &vName);
 
         // エンドポイントの情報を取る
-        IAudioEndpointVolume* pAudioEndVol = NULL;
-        hr = pEndpoint->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&pAudioEndVol);
+        //IAudioEndpointVolume* pAudioEndVol = NULL;
+        hr = pEndpoint[i]->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&pAudioEndVol[i]);
 
-        // エンドポイントに指示を出す（「IAudioEndpointVolume」のVolumeは、マイクの怨霊という意味の「ボリューム」とは別の意味っぽい）
-        float getVolume = 0.0f;
-        pAudioEndVol->GetMasterVolumeLevelScalar(&getVolume);				// 音量を取得
-        float setVolume = 0.25f;
-        pAudioEndVol->SetMasterVolumeLevelScalar(setVolume, &GUID_NULL);	// 音量を設定
+        vn[i] = new CVolumeNotification(vName.pwszVal);
+        pAudioEndVol[i]->RegisterControlChangeNotify(vn[i]);
 
-        std::wstring outString = std::to_wstring(i) + L":" + vName.pwszVal + std::to_wstring(getVolume) + L"\r\n";
-        OutputDebugString(outString.c_str());
+
+        //// エンドポイントに指示を出す（「IAudioEndpointVolume」のVolumeは、マイクの怨霊という意味の「ボリューム」とは別の意味っぽい）
+        //float getVolume = 0.0f;
+        //pAudioEndVol->GetMasterVolumeLevelScalar(&getVolume);				// 音量を取得
+        //float setVolume = 0.25f;
+        //pAudioEndVol->SetMasterVolumeLevelScalar(setVolume, &GUID_NULL);	// 音量を設定
+
+        /*std::wstring outString = std::to_wstring(i) + L":" + vName.pwszVal + std::to_wstring(getVolume) + L"\r\n";
+        OutputDebugString(outString.c_str());*/
 
         // 後処理系
-        if (pAudioEndVol)
-            pAudioEndVol->Release();
-        if (pProperties)
+        /*if (pProperties)
             pProperties->Release();
         if (pEndpoint)
-            pEndpoint->Release();
+            pEndpoint->Release();*/
     }
 
     while (1)
@@ -73,6 +80,11 @@ int main()
 
 
     // 後処理系
+    for (size_t i = 0; i < sizeof(pAudioEndVol) / sizeof(pAudioEndVol[0]); i++)
+    {
+        if (pAudioEndVol[i] != NULL)
+            pAudioEndVol[i]->Release();
+    }
     if (pCollection)
         pCollection->Release();
     if (pEnum)
@@ -81,6 +93,10 @@ int main()
     // COMの後処理(COMのお作法)
     CoUninitialize();
 }
+
+
+
+
 
 /*
 参考：

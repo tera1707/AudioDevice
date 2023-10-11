@@ -130,10 +130,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CMMNotificationClient.cpp" />
+    <ClCompile Include="CVolumeNotification.cpp" />
     <ClCompile Include="MicJikken.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMMNotificationClient.h" />
+    <ClInclude Include="CVolumeNotification.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
