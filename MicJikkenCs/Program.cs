@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace MicJikkenCs
@@ -27,6 +28,13 @@ namespace MicJikkenCs
 
                 var name = Marshal.PtrToStringUni(vName.pwszVal);
                 Console.WriteLine(name);
+
+                Guid IID_IAudioEndpointVolume = typeof(IAudioEndpointVolume).GUID;
+                hr = pEndpoint.Activate(IID_IAudioEndpointVolume, 0, IntPtr.Zero, out var endpointVolume);
+                IAudioEndpointVolume masterVol = (IAudioEndpointVolume)endpointVolume;
+
+                hr = masterVol.GetMasterVolumeLevelScalar(out var pMasterVolumeLevel);
+                hr = masterVol.SetMasterVolumeLevelScalar(0.30f, new Guid());
             }
 
             Console.ReadLine();
@@ -64,12 +72,14 @@ internal interface IMMDeviceCollection
     public int Item(uint nDevice, out IMMDevice ppDevice);
 }
 
+// 参考
+// https://shikaku-sh.hatenablog.com/entry/c-charp-how-to-use-core-audio-api
 [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 [Guid("D666063F-1587-4E43-81F1-B948E807363F")]
 internal interface IMMDevice
 {
     [PreserveSig]
-    public int dummy();
+    public int Activate(Guid iid, ulong dwClsCtx, IntPtr pActivationParams, [MarshalAs(UnmanagedType.IUnknown)] out object ppInterface);
     [PreserveSig]
     public int OpenPropertyStore(ulong stgmAccess, out IPropertyStore ppProperties);
 }
@@ -101,6 +111,110 @@ internal interface IMMNotificationClient
     int OnDefaultDeviceChanged(EDataFlow flow, ERole role, string pwstrDefaultDeviceId);
     [PreserveSig]
     int OnPropertyValueChanged(string pwstrDeviceId, ref PROPERTYKEY key);
+}
+
+[ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+[Guid("657804FA-D6AD-4496-8A60-352752AF4F89")]
+internal interface IAudioEndpointVolumeCallback
+{
+    [PreserveSig]
+    public int OnNotify(ref AUDIO_VOLUME_NOTIFICATION_DATA pNotify);
+}
+
+[Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IAudioEndpointVolume
+{
+    [PreserveSig]
+    int NotImpl1();
+
+    [PreserveSig]
+    int NotImpl2();
+
+    [PreserveSig]
+    int GetChannelCount(
+        [Out][MarshalAs(UnmanagedType.U4)] out UInt32 channelCount);
+
+    [PreserveSig]
+    int SetMasterVolumeLevel(
+        [In][MarshalAs(UnmanagedType.R4)] float level,
+        [In][MarshalAs(UnmanagedType.LPStruct)] Guid eventContext);
+
+    [PreserveSig]
+    int SetMasterVolumeLevelScalar(
+        [In][MarshalAs(UnmanagedType.R4)] float level,
+        [In][MarshalAs(UnmanagedType.LPStruct)] Guid eventContext);
+
+    [PreserveSig]
+    int GetMasterVolumeLevel(
+        //[Out][MarshalAs(UnmanagedType.R4)] out float level);
+        out float level);
+
+    [PreserveSig]
+    int GetMasterVolumeLevelScalar(
+        [Out][MarshalAs(UnmanagedType.R4)] out float level);
+
+    [PreserveSig]
+    int SetChannelVolumeLevel(
+        [In][MarshalAs(UnmanagedType.U4)] UInt32 channelNumber,
+        [In][MarshalAs(UnmanagedType.R4)] float level,
+        [In][MarshalAs(UnmanagedType.LPStruct)] Guid eventContext);
+
+    [PreserveSig]
+    int SetChannelVolumeLevelScalar(
+        [In][MarshalAs(UnmanagedType.U4)] UInt32 channelNumber,
+        [In][MarshalAs(UnmanagedType.R4)] float level,
+        [In][MarshalAs(UnmanagedType.LPStruct)] Guid eventContext);
+
+    [PreserveSig]
+    int GetChannelVolumeLevel(
+        [In][MarshalAs(UnmanagedType.U4)] UInt32 channelNumber,
+        [Out][MarshalAs(UnmanagedType.R4)] out float level);
+
+    [PreserveSig]
+    int GetChannelVolumeLevelScalar(
+        [In][MarshalAs(UnmanagedType.U4)] UInt32 channelNumber,
+        [Out][MarshalAs(UnmanagedType.R4)] out float level);
+
+    [PreserveSig]
+    int SetMute(
+        [In][MarshalAs(UnmanagedType.Bool)] Boolean isMuted,
+        [In][MarshalAs(UnmanagedType.LPStruct)] Guid eventContext);
+
+    [PreserveSig]
+    int GetMute(
+        [Out][MarshalAs(UnmanagedType.Bool)] out Boolean isMuted);
+
+    [PreserveSig]
+    int GetVolumeStepInfo(
+        [Out][MarshalAs(UnmanagedType.U4)] out UInt32 step,
+        [Out][MarshalAs(UnmanagedType.U4)] out UInt32 stepCount);
+
+    [PreserveSig]
+    int VolumeStepUp(
+        [In][MarshalAs(UnmanagedType.LPStruct)] Guid eventContext);
+
+    [PreserveSig]
+    int VolumeStepDown(
+        [In][MarshalAs(UnmanagedType.LPStruct)] Guid eventContext);
+
+    [PreserveSig]
+    int QueryHardwareSupport(
+        [Out][MarshalAs(UnmanagedType.U4)] out UInt32 hardwareSupportMask);
+
+    [PreserveSig]
+    int GetVolumeRange(
+        [Out][MarshalAs(UnmanagedType.R4)] out float volumeMin,
+        [Out][MarshalAs(UnmanagedType.R4)] out float volumeMax,
+        [Out][MarshalAs(UnmanagedType.R4)] out float volumeStep);
+}
+
+struct AUDIO_VOLUME_NOTIFICATION_DATA
+{
+    Guid guidEventContext;
+    int bMuted;
+    float fMasterVolume;
+    uint nChannels;
+    float[] afChannelVolumes;
 }
 
 public enum EDataFlow
