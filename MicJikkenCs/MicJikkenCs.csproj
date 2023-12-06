@@ -5,6 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <BaseOutputPath>\\192.168.31.13\test\audio</BaseOutputPath>
   </PropertyGroup>
 
 </Project>

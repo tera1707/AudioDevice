@@ -29,49 +29,86 @@ int main()
     auto nc = new CMMNotificationClient(pEnum);
     pEnum->RegisterEndpointNotificationCallback(nc);
 
-    // オーディオエンドポイントの列挙を実行
-    hr = pEnum->EnumAudioEndpoints(EDataFlow::eCapture, DEVICE_STATE_ACTIVE, &pCollection);
-
-    // とれた数を数える
-    hr = pCollection->GetCount(&deviceCount);
-
-    for (int i = 0; i < deviceCount; i++)
-    {
-        // デバイスの情報を取る
-        pCollection->Item(i, &pEndpoint[i]);
-
-        // デバイスのプロパティを取る
-        pEndpoint[i]->OpenPropertyStore(STGM_READ, &pProperties[i]);
-
-        // 取ったプロパティから、値を指定して取得する
-        PROPVARIANT vName;
-        PropVariantInit(&vName);
-        pProperties[i]->GetValue(PKEY_Device_FriendlyName, &vName);
-
-        // エンドポイントの情報を取る
-        hr = pEndpoint[i]->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&pAudioEndVol[i]);
-
-        // 音量・ミュート状態の変更検知
-        vn[i] = new CVolumeNotification(vName.pwszVal);
-        pAudioEndVol[i]->RegisterControlChangeNotify(vn[i]);
-
-        //// エンドポイントに指示を出す（「IAudioEndpointVolume」のVolumeは、マイクの怨霊という意味の「ボリューム」とは別の意味っぽい）
-        float getVolume = 0.0f;
-        pAudioEndVol[i]->GetMasterVolumeLevelScalar(&getVolume);				// 音量を取得
-        float setVolume = 0.25f;
-        pAudioEndVol[i]->SetMasterVolumeLevelScalar(setVolume, &GUID_NULL);	// 音量を設定
-
-        std::wstring outString = std::to_wstring(i) + L":" + vName.pwszVal + std::to_wstring(getVolume) + L"\r\n";
-        OutputDebugString(outString.c_str());
-
-        // 後処理系
-        if (pProperties)
-            pProperties[i]->Release();
-    }
 
     while (1)
     {
-        Sleep(100000);
+        {
+            // デフォルト(OSが現在使用している)オーディオエンドポイントを取る（今回はCapture(マイク)EP）
+            IMMDevice* pDefEndpoint = NULL;
+            hr = pEnum->GetDefaultAudioEndpoint(EDataFlow::eRender, ERole::eMultimedia, &pDefEndpoint);
+
+            LPWSTR id = NULL;
+            hr = pDefEndpoint->GetId(&id);
+
+            // デバイスのプロパティを取る
+            IPropertyStore* pDefProperties = { NULL };
+            pDefEndpoint->OpenPropertyStore(STGM_READ, &pDefProperties);
+
+            // 取ったプロパティから、値を指定して取得する
+            PROPVARIANT vDefName;
+            PropVariantInit(&vDefName);
+            pDefProperties->GetValue(PKEY_Device_FriendlyName, &vDefName);
+
+            wprintf(L"default Mic Device\r\n");
+            wprintf(L"\r\n");
+            wprintf(L"  %s\r\n", vDefName.bstrVal);
+            wprintf(L"    %s\r\n", id);
+        }
+
+        {
+            // すべてのCaptureデバイスを列挙する
+            wprintf(L"\r\n");
+            wprintf(L"List all Capture(mic) Device.\r\n");
+            wprintf(L"\r\n");
+
+            // オーディオエンドポイントの列挙を実行
+            hr = pEnum->EnumAudioEndpoints(EDataFlow::eRender, DEVICE_STATE_ACTIVE, &pCollection);
+
+            // とれた数を数える
+            hr = pCollection->GetCount(&deviceCount);
+
+            for (int i = 0; i < deviceCount; i++)
+            {
+                // デバイスの情報を取る
+                pCollection->Item(i, &pEndpoint[i]);
+
+                LPWSTR id = NULL;
+                hr = pEndpoint[i]->GetId(&id);
+
+                // デバイスのプロパティを取る
+                pEndpoint[i]->OpenPropertyStore(STGM_READ, &pProperties[i]);
+
+                // 取ったプロパティから、値を指定して取得する
+                PROPVARIANT vName;
+                PropVariantInit(&vName);
+                pProperties[i]->GetValue(PKEY_Device_FriendlyName, &vName);
+
+                // エンドポイントの情報を取る
+                hr = pEndpoint[i]->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&pAudioEndVol[i]);
+
+                // 音量・ミュート状態の変更検知
+                vn[i] = new CVolumeNotification(vName.pwszVal);
+                pAudioEndVol[i]->RegisterControlChangeNotify(vn[i]);
+
+                //// エンドポイントに指示を出す（「IAudioEndpointVolume」のVolumeは、マイクの怨霊という意味の「ボリューム」とは別の意味っぽい）
+                float getVolume = 0.0f;
+                pAudioEndVol[i]->GetMasterVolumeLevelScalar(&getVolume);				// 音量を取得
+                float setVolume = 0.25f;
+                pAudioEndVol[i]->SetMasterVolumeLevelScalar(setVolume, &GUID_NULL);	// 音量を設定
+
+                std::wstring outString = std::to_wstring(i) + L":" + vName.pwszVal + std::to_wstring(getVolume);
+                wprintf(L"  %s\r\n", outString.c_str());
+                wprintf(L"    %s\r\n", id);
+                OutputDebugString(outString.c_str());
+
+                // 後処理系
+                if (pProperties)
+                    pProperties[i]->Release();
+            }
+        }
+
+        Sleep(1000);
+        std::system("cls");
     }
 
     // 後処理系
