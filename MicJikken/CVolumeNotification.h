@@ -4,13 +4,17 @@
 #include <functiondiscoverykeys.h>
 #include <endpointvolume.h>
 #include <string>
+#include <functional>
 
 class CVolumeNotification : public IAudioEndpointVolumeCallback
 {
+private:
     ULONG _cRef;
     std::wstring targetEndpointName;
+    std::function<void(std::wstring micName, bool isMute)> OnMicNotify;
+
 public:
-    CVolumeNotification(std::wstring targetEndpointName);
+    CVolumeNotification(std::wstring targetEndpointName, std::function<void(std::wstring micName, bool isMute)> onMicNotify);
     ~CVolumeNotification();
 
     ULONG STDMETHODCALLTYPE AddRef();

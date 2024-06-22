@@ -70,14 +70,6 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>\\192.168.31.13\test\audio</OutDir>
-    <IntDir>\\192.168.31.13\test\audio</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>\\192.168.31.13\test\audio</OutDir>
-    <IntDir>\\192.168.31.13\test\audio</IntDir>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -139,11 +131,15 @@
   <ItemGroup>
     <ClCompile Include="CMMNotificationClient.cpp" />
     <ClCompile Include="CVolumeNotification.cpp" />
+    <ClCompile Include="MicData.cpp" />
     <ClCompile Include="MicJikken.cpp" />
+    <ClCompile Include="MicManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CMMNotificationClient.h" />
     <ClInclude Include="CVolumeNotification.h" />
+    <ClInclude Include="MicData.h" />
+    <ClInclude Include="MicManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

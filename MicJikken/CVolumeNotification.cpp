@@ -6,9 +6,10 @@
 
 #include "CVolumeNotification.h"
 
-CVolumeNotification::CVolumeNotification(std::wstring targetEndpointName) : _cRef(1) 
+CVolumeNotification::CVolumeNotification(std::wstring targetEndpointName, std::function<void(std::wstring micName, bool isMute)> onMicNotify) : _cRef(1)
 {
     this->targetEndpointName = targetEndpointName;
+    this->OnMicNotify = onMicNotify;
 }
 
 CVolumeNotification::~CVolumeNotification() {}
@@ -60,6 +61,8 @@ HRESULT STDMETHODCALLTYPE CVolumeNotification::OnNotify(PAUDIO_VOLUME_NOTIFICATI
     auto volume = pNotify->fMasterVolume;
 
     OutputDebugString((targetEndpointName + L" mute:" + std::to_wstring(mute) + L" volume:" + std::to_wstring(volume) + L"\r\n").c_str());
+
+    OnMicNotify(targetEndpointName, mute);
 
     return S_OK;
 }
