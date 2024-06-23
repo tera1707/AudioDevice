@@ -33,3 +33,23 @@ MicData::MicData(IMMDevice* mic, std::function<void(std::wstring micName, bool i
 	if (pProperties)
 		pProperties->Release();
 }
+
+BOOL MicData::GetMute()
+{
+	if (pAudioEndVol == NULL)
+		return FALSE;
+
+	BOOL mute = FALSE;
+
+	pAudioEndVol->GetMute(&mute);
+
+	return mute;
+}
+
+void MicData::SetMute(BOOL mute)
+{
+	if (pAudioEndVol == NULL)
+		return;
+
+	pAudioEndVol->SetMute(mute, NULL);
+}

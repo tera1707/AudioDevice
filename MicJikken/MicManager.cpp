@@ -49,3 +49,39 @@ void MicManager::StoreMics()
         Mics.push_back(mc);
     }
 }
+
+// -1:マイクがない 0:全部アンミュート 1:全部ミュート 2:混ざってる 
+int MicManager::GetAllMicMute()
+{
+    if (Mics.size() == 0)
+        return -1;
+
+    int muteCount = 0;
+
+    // ミュート状態のマイクの数を確認
+    for (int i = 0 ; i < Mics.size(); i++)
+    {
+        if (Mics[i].GetMute() != FALSE)
+            muteCount++;
+    }
+
+    if (muteCount == Mics.size())
+        return 1;
+    if (muteCount == 0)
+        return 0;
+    else
+        return 2;
+
+}
+
+void MicManager::SetAllNucNute(BOOL muteAll)
+{
+    if (Mics.size() == 0)
+        return;
+
+    // 全マイクのmuteを設定
+    for (int i = 0; i < Mics.size(); i++)
+    {
+        Mics[i].SetMute(muteAll);
+    }
+}

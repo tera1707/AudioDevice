@@ -17,6 +17,9 @@ public:
 	void Initialize();
 	void StoreMics();	
 
+	int GetAllMicMute();
+	void SetAllNucNute(BOOL muteAll);
+
 private:
 
 	IMMDeviceEnumerator* pEnum = NULL;
