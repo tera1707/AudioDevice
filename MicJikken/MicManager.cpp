@@ -58,10 +58,10 @@ void MicManager::StoreMics()
 }
 
 // -1:マイクがない 0:全部アンミュート 1:全部ミュート 2:混ざってる 
-int MicManager::GetAllMicMute()
+MuteState MicManager::GetAllMicMute()
 {
     if (Mics.size() == 0)
-        return -1;
+        return MuteState::NoMic;
 
     int muteCount = 0;
 
@@ -73,11 +73,11 @@ int MicManager::GetAllMicMute()
     }
 
     if (muteCount == Mics.size())
-        return 1;
+        return MuteState::AllMuted;
     if (muteCount == 0)
-        return 0;
+        return MuteState::AllUnmuted;
     else
-        return 2;
+        return MuteState::Mix;
 
 }
 

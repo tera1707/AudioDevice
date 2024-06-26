@@ -10,6 +10,16 @@
 #include "CVolumeNotification.h"
 #include "MicData.h"
 
+// -1:マイクがない 0:全部アンミュート 1:全部ミュート 2:混ざってる 
+enum MuteState
+{
+	NoMic,
+	AllUnmuted,
+	AllMuted,
+	Mix,
+};
+
+
 class MicManager
 {
 public:
@@ -18,7 +28,7 @@ public:
 	void Initialize();
 	void StoreMics();	
 
-	int GetAllMicMute();
+	MuteState GetAllMicMute();
 	void SetAllNucNute(BOOL muteAll);
 
 	void OnMuteChanged(std::wstring micName, bool isMuted);
