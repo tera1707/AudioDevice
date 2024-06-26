@@ -5,28 +5,22 @@
 
 int main()
 {
-    MicManager micManager;
-
-    micManager.Initialize();
-
-    micManager.StoreMics();
-
-    auto allMuted = micManager.GetAllMicMute();
-
-
-    auto mute = FALSE;
-    for (int i = 0; i < 10; i++)
     {
-        micManager.SetAllNucNute(mute);
-        
+        MicManager micManager;
+        micManager.Initialize();
+        micManager.StoreMics();
         auto allMuted = micManager.GetAllMicMute();
-        
-        auto log = std::wstring(L"All Muted? : " + std::to_wstring(allMuted) + L"\r\n");
-        wprintf(log.c_str());
+        auto log = std::wstring(L"All Muted? : " + std::wstring(allMuted == 0 ? L"All unmute." : (allMuted == 1 ? L"All mute." : L"Mix.")) + L"\r\n");
+    }
 
-        mute = !mute;
+    system("pause"); //一時停止
 
-        Sleep(3000);
+    {
+        MicManager micManager;
+        micManager.Initialize();
+        micManager.StoreMics();
+        auto allMuted = micManager.GetAllMicMute();
+        auto log = std::wstring(L"All Muted? : " + std::wstring(allMuted == 0 ? L"All unmute." : (allMuted == 1 ? L"All mute." : L"Mix.")) + L"\r\n");
     }
 
     system("pause"); //一時停止

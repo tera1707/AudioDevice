@@ -4,6 +4,7 @@
 #include <functiondiscoverykeys.h>
 #include <endpointvolume.h>
 #include <vector>
+#include <memory>
 
 #include "CMMNotificationClient.h"
 #include "CVolumeNotification.h"
@@ -20,11 +21,14 @@ public:
 	int GetAllMicMute();
 	void SetAllNucNute(BOOL muteAll);
 
+	void OnMuteChanged(std::wstring micName, bool isMuted);
 private:
 
 	IMMDeviceEnumerator* pEnum = NULL;
 	CMMNotificationClient* nc = NULL;
 
-	std::vector<MicData> Mics;
+	std::vector<std::unique_ptr<MicData>> Mics;
+
+	std::function<void(std::wstring micName, bool isMuted)> a;
 };
 

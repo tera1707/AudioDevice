@@ -3,7 +3,9 @@
 MicData::MicData(IMMDevice* mic, std::function<void(std::wstring micName, bool isMute)> onMicNotify)
 {
 	OnMicNotify = onMicNotify;
-	pEndpoint = mic;
+	IMMDevice* pEndpoint = mic;
+
+	IPropertyStore* pProperties;
 
 	LPWSTR id = NULL;
 	auto hr = pEndpoint->GetId(&id);
@@ -32,6 +34,20 @@ MicData::MicData(IMMDevice* mic, std::function<void(std::wstring micName, bool i
 	// Œãˆ—Œn
 	if (pProperties)
 		pProperties->Release();
+
+	if (pEndpoint)
+		pEndpoint->Release();
+}
+
+MicData::~MicData()
+{
+	if (pAudioEndVol)
+		pAudioEndVol->Release();
+
+	if (vn)
+		vn->Release();
+	
+	wprintf(L"~MicData ---------------\r\n");
 }
 
 BOOL MicData::GetMute()

@@ -7,13 +7,12 @@ class MicData
 {
 public:
 	MicData(IMMDevice* mic, std::function<void(std::wstring micName, bool isMute)> onMicNotify);
+	~MicData();
 
 	BOOL GetMute();
 	void SetMute(BOOL mute);
 
 private:
-	IMMDevice* pEndpoint;
-	IPropertyStore* pProperties;
 	IAudioEndpointVolume* pAudioEndVol;
 	CVolumeNotification* vn;
 
