@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <BaseOutputPath>\\192.168.31.13\test\audio</BaseOutputPath>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
 </Project>

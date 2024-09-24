@@ -1,0 +1,7 @@
+IMMDeviceEnumerator
+MMDeviceEnumerator
+IMMNotificationClient
+IAudioEndpointVolume
+PROPERTYKEY
+
+
